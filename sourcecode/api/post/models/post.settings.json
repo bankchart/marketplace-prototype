@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "posts",
+  "info": {
+    "name": "post"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "detail": {
+      "type": "richtext",
+      "required": true
+    },
+    "categories": {
+      "collection": "category"
+    },
+    "keywords": {
+      "type": "enumeration",
+      "enum": [
+        "product",
+        "service"
+      ],
+      "default": "product",
+      "required": true
+    }
+  }
+}
