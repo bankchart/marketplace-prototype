@@ -1,4 +1,4 @@
-INSTALLATION
+SKIP: INSTALLATION Strapi
 $ npx create-strapi-app my-project --quickstart
 
 START PROJECT
