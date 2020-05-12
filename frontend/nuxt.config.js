@@ -1,5 +1,18 @@
 export default {
   mode: "universal",
+  router: {
+    middleware: ["auth"]
+  },
+  auth: {
+    strategies: {
+      facebook: {
+        client_id: "823538334721258",
+        userinfo_endpoint:
+          "https://graph.facebook.com/v2.12/me?fields=about,name,picture{url},email,birthday",
+        scope: ["public_profile", "email", "user_birthday"]
+      }
+    }
+  },
   /*
    ** Headers of the page
    */
@@ -14,7 +27,14 @@ export default {
         content: process.env.npm_package_description || ""
       }
     ],
-    link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }]
+    link: [
+      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      {
+        rel: "stylesheet",
+        href:
+          "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"
+      }
+    ]
   },
   /*
    ** Customize the progress-bar color
@@ -40,13 +60,16 @@ export default {
    */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
-    "@nuxtjs/axios"
+    "@nuxtjs/axios",
+    "@nuxtjs/auth"
   ],
   /*
    ** Axios module configuration
    ** See https://axios.nuxtjs.org/options
    */
-  axios: {},
+  axios: {
+    // baseURL: "https://localhost"
+  },
   /*
    ** Build configuration
    */
