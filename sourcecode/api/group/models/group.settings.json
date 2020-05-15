@@ -32,6 +32,10 @@
     },
     "class": {
       "type": "string"
+    },
+    "owner": {
+      "plugin": "users-permissions",
+      "model": "user"
     }
   }
 }

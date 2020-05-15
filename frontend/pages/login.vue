@@ -30,17 +30,18 @@ export default {
 
   data() {
     return {
-      email: "",
-      password: "",
       error: null
     };
+  },
+
+  mounted() {
+    console.log(this.$auth);
   },
 
   methods: {
     async login() {
       try {
-        await this.$auth.loginWith("facebook");
-
+        const result = await this.$auth.loginWith("facebook");
         this.$router.push("/");
       } catch (e) {
         this.error = e.response.data.message;

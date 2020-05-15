@@ -73,6 +73,10 @@
     },
     "last_name": {
       "type": "string"
+    },
+    "facebook_userid": {
+      "type": "string",
+      "unique": true
     }
   }
 }

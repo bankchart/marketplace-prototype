@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/secure-secrets",
+      "handler": "secure-secret.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/secure-secrets/count",
+      "handler": "secure-secret.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/secure-secrets/:id",
+      "handler": "secure-secret.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/secure-secrets",
+      "handler": "secure-secret.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/secure-secrets/:id",
+      "handler": "secure-secret.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/secure-secrets/:id",
+      "handler": "secure-secret.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

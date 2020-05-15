@@ -4,7 +4,7 @@
       <h2 class="title">My Profile</h2>
       <div class="content">
         <p>
-          <strong>Username:</strong>
+          <strong>Name:</strong>
           {{ loggedInUser.name }}
         </p>
         <p>

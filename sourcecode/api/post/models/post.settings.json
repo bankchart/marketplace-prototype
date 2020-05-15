@@ -28,6 +28,13 @@
       ],
       "default": "product",
       "required": true
+    },
+    "group": {
+      "model": "group"
+    },
+    "user": {
+      "plugin": "users-permissions",
+      "model": "user"
     }
   }
 }
