@@ -13,51 +13,39 @@
       <section class="modal-card-body">
         <div>
           <div class="field">
-            <label class="label">ชื่อกลุ่ม</label>
+            <label class="label">ชื่อโพสต์</label>
             <div class="control">
-              <input v-model="group.name" class="input" type="text" />
+              <input v-model="post.title" class="input" type="text" />
             </div>
           </div>
 
           <div class="field">
-            <label class="label">มหาวิทยาลัย/สถานศึกษา/อื่นๆ</label>
+            <label class="label">รายละเอียด</label>
             <div class="control">
-              <input v-model="group.university" class="input" type="text" />
+              <textarea
+                v-model="post.detail"
+                class="textarea"
+                rows="3"
+                style="resize: none"
+              ></textarea>
             </div>
           </div>
 
           <div class="field">
-            <label class="label">สาขา/สาย/อื่นๆ</label>
-            <div class="control">
-              <input v-model="group.major" class="input" type="text" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label">รุ่น</label>
-            <div class="control">
-              <input v-model="group.class" class="input" type="text" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label">รูปกลุ่ม</label>
-            <div class="control">
-              <input
-                id="groupPicture"
-                type="file"
-                accept="image/*"
-                @change="previewImage"
-              />
-              <div v-if="group.imageData.length > 0" class="image-preview">
-                <img class="preview" :src="group.imageData" />
+            <label class="label">คีย์เวิร์ด</label>
+            <div class="contorl">
+              <div class="select">
+                <select v-model="post.keywords">
+                  <option value="product">สินค้า</option>
+                  <option value="service">บริการ</option>
+                </select>
               </div>
             </div>
           </div>
         </div>
       </section>
       <footer class="modal-card-foot">
-        <button class="button is-success" @click="createGroup">สร้าง</button>
+        <button class="button is-success" @click="createPost">สร้าง</button>
         <button class="button" @click="setShowCreatePostModal(false)">
           ยกเลิก
         </button>
@@ -79,12 +67,10 @@ export default {
   data() {
     return {
       error: null,
-      group: {
-        name: null,
-        university: null,
-        major: null,
-        class: null,
-        imageData: ""
+      post: {
+        title: null,
+        detail: null,
+        keywords: "product"
       }
     };
   },
@@ -101,23 +87,16 @@ export default {
       setShowCreatePostModal: "setShowCreatePostModal"
     }),
 
-    async createGroup(e) {
+    async createPost(e) {
       try {
-        let imageId = null;
-        const imageFile = document.querySelector("#groupPicture");
-        if (imageFile.files[0]) {
-          imageId = await this.uploadImage();
-        }
-
         const result = await axios.post(
-          "https://localhost/groups",
+          "https://localhost/posts",
           {
-            name: this.group.name,
-            university: this.group.university,
-            major: this.group.major,
-            class: this.group.class,
-            owner: this.userId,
-            profile_picture: imageId
+            title: this.post.title,
+            detail: this.post.detail,
+            keywords: this.post.keywords,
+            group: this.$route.params.id,
+            owner: this.userId
           },
           {
             headers: {
@@ -125,43 +104,13 @@ export default {
             }
           }
         );
-        this.setShowCreateGroupModal(false);
+        this.setShowCreatePostModal(false);
         e.preventDefault();
         window.location.reload();
       } catch (e) {
         this.error = e.message;
       }
-    },
-
-    previewImage(event) {
-      const input = event.target;
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-          this.group.imageData = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    },
-
-    async uploadImage() {
-      const formData = new FormData();
-      const imageFile = document.querySelector("#groupPicture");
-      formData.append("files", imageFile.files[0]);
-      const result = await axios.post("https://localhost/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
-      return result.data[0].id;
     }
   }
 };
 </script>
-
-<style lang="css" scoped>
-.preview {
-  width: 250px;
-  margin-top: 20px;
-}
-</style>
