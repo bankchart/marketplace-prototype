@@ -53,15 +53,6 @@
       "plugin": "users-permissions",
       "configurable": false
     },
-    "profile_picture": {
-      "model": "file",
-      "via": "related",
-      "allowedTypes": [
-        "images"
-      ],
-      "plugin": "upload",
-      "required": false
-    },
     "university": {
       "type": "string"
     },
@@ -77,6 +68,13 @@
     "facebook_userid": {
       "type": "string",
       "unique": true
+    },
+    "comments": {
+      "collection": "comment",
+      "via": "owner"
+    },
+    "picture_profile": {
+      "type": "string"
     }
   }
 }

@@ -30,11 +30,16 @@
       "required": true
     },
     "group": {
-      "model": "group"
+      "model": "group",
+      "via": "posts"
     },
-    "user": {
+    "owner": {
       "plugin": "users-permissions",
       "model": "user"
+    },
+    "comments": {
+      "collection": "comment",
+      "via": "post"
     }
   }
 }

@@ -1,6 +1,7 @@
 export const state = () => ({
   jwt: null,
   showCreateGroupModal: false,
+  showCreatePostModal: false,
   userId: null
 });
 
@@ -23,6 +24,10 @@ export const getters = {
 
   isShowCreateGroupModal(state) {
     return state.showCreateGroupModal;
+  },
+
+  isShowCreatePostModal(state) {
+    return state.showCreatePostModal;
   }
 };
 
@@ -37,5 +42,9 @@ export const mutations = {
 
   setShowCreateGroupModal(state, show) {
     state.showCreateGroupModal = show;
+  },
+
+  setShowCreatePostModal(state, show) {
+    state.showCreatePostModal = show;
   }
 };

@@ -3,11 +3,11 @@
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
-        <p class="modal-card-title">สร้างกลุ่ม</p>
+        <p class="modal-card-title">สร้างโพสต์</p>
         <button
           class="delete"
           aria-label="close"
-          @click="setShowCreateGroupModal(false)"
+          @click="setShowCreatePostModal(false)"
         ></button>
       </header>
       <section class="modal-card-body">
@@ -58,7 +58,7 @@
       </section>
       <footer class="modal-card-foot">
         <button class="button is-success" @click="createGroup">สร้าง</button>
-        <button class="button" @click="setShowCreateGroupModal(false)">
+        <button class="button" @click="setShowCreatePostModal(false)">
           ยกเลิก
         </button>
         <article v-if="error" class="message is-danger">
@@ -98,7 +98,7 @@ export default {
 
   methods: {
     ...mapMutations({
-      setShowCreateGroupModal: "setShowCreateGroupModal"
+      setShowCreatePostModal: "setShowCreatePostModal"
     }),
 
     async createGroup(e) {

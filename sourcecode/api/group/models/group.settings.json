@@ -36,6 +36,10 @@
     "owner": {
       "plugin": "users-permissions",
       "model": "user"
+    },
+    "posts": {
+      "via": "group",
+      "collection": "post"
     }
   }
 }

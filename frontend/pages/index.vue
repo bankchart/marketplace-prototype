@@ -18,7 +18,11 @@
         :key="`grp-${subGrpIndex}`"
         class="column is-4"
       >
-        <div class="card" style="cursor: pointer">
+        <div
+          class="card"
+          style="cursor: pointer"
+          @click="$router.push(`group/${grp.id}`)"
+        >
           <div class="card-image">
             <figure class="image is-4by3">
               <img
@@ -68,12 +72,15 @@ export default {
       groups: []
     };
   },
+
   async mounted() {
     try {
+      console.log(this.$auth.user);
       const regResult = await axios.post("https://localhost/register-api", {
         facebook_userid: this.$auth.user.id,
         email: this.$auth.user.email,
-        name: this.$auth.user.name
+        name: this.$auth.user.name,
+        picture_profile: this.$auth.user.picture.data.url
       });
 
       this.addJwt(regResult.data.jwt);
