@@ -23,7 +23,7 @@ module.exports = {
     try {
       if (!users) {
         const regResult = await axios
-          .post('http://localhost/auth/local/register', 
+          .post('http://localhost:1337/auth/local/register', 
           {
             username,
             email,
@@ -48,7 +48,7 @@ module.exports = {
         };
       } else {
         const loginResult = await axios
-          .post('http://localhost/auth/local', {
+          .post('http://localhost:1337/auth/local', {
             identifier: username,
             password
           });

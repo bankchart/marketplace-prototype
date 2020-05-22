@@ -31,7 +31,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters, mapMutations } from "vuex";
 
 export default {
@@ -66,14 +65,11 @@ export default {
         e.preventDefault();
         const postId = this.propsConfirmDeletePostModal.postId;
         // TODO: delete post by only owner post
-        const result = await axios.delete(
-          `https://9bkfullstackd.com/strapi/posts/${postId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.jwtToken}`
-            }
+        const result = await this.$backend.delete(`/posts/${postId}`, {
+          headers: {
+            Authorization: `Bearer ${this.jwtToken}`
           }
-        );
+        });
         this.resetPropsConfirmDeletePost();
         this.setShowConfirmDeletePostModal(false);
         this.setForceLoadPost(true);

@@ -190,7 +190,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapMutations, mapGetters, mapState } from "vuex";
 
 export default {
@@ -226,9 +225,33 @@ export default {
 
   async mounted() {
     await this.loadPosts();
+    await this.test();
   },
 
   methods: {
+    async test() {
+      const result = await this.$backend.post(
+        "/graphql",
+        {
+          query: `
+            query {
+              groups {
+                name,
+                owner {
+                  id,
+                  username
+                }
+              }
+            }
+          `
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.jwtToken}`
+          }
+        }
+      );
+    },
     triggerOpenConfirmDeleteModal(postId, postName, groupId) {
       this.setPropsConfirmDeletePost({ postId, postName, groupId });
       this.setShowConfirmDeletePostModal(true);
@@ -249,8 +272,8 @@ export default {
       try {
         this.ready = false;
         if (!fromSearch) {
-          const result = await axios.get(
-            `https://9bkfullstackd.com/strapi/groups/${this.$route.params.id}`,
+          const result = await this.$backend.get(
+            `/groups/${this.$route.params.id}`,
             {
               headers: {
                 Authorization: `Bearer ${this.jwtToken}`
@@ -291,8 +314,8 @@ export default {
             this.$refs[`button_${postId}`][0].classList.remove("is-loading");
             this.$refs[`button_${postId}`][0].classList.add("is-loading");
 
-            const result = await axios.post(
-              "https://9bkfullstackd.com/strapi/comments",
+            const result = await this.$backend.post(
+              "/comments",
               {
                 content: postComment,
                 post: postId,
@@ -319,14 +342,11 @@ export default {
     },
     async getPostById(id) {
       try {
-        const result = await axios.get(
-          `https://9bkfullstackd.com/strapi/posts/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.jwtToken}`
-            }
+        const result = await this.$backend.get(`/posts/${id}`, {
+          headers: {
+            Authorization: `Bearer ${this.jwtToken}`
           }
-        );
+        });
         return result.data;
       } catch (e) {
         console.error(e);
@@ -334,9 +354,7 @@ export default {
     },
     async getUserById(id) {
       try {
-        const result = await axios.get(
-          `https://9bkfullstackd.com/strapi/users/${id}`
-        );
+        const result = await this.$backend.get(`/users/${id}`);
         return result.data;
       } catch (e) {
         console.error(e);
@@ -345,18 +363,15 @@ export default {
     async onSearch() {
       try {
         if (this.search.value.trim().length > 0) {
-          const result = await axios.get(
-            `https://9bkfullstackd.com/strapi/posts`,
-            {
-              headers: {
-                Authorization: `Bearer ${this.jwtToken}`
-              },
-              params: {
-                title_contains: this.search.value.trim(),
-                group_eq: this.$route.params.id
-              }
+          const result = await this.$backend.get(`/posts`, {
+            headers: {
+              Authorization: `Bearer ${this.jwtToken}`
+            },
+            params: {
+              title_contains: this.search.value.trim(),
+              group_eq: this.$route.params.id
             }
-          );
+          });
           this.loadPosts(result.data);
         } else {
           this.loadPosts();

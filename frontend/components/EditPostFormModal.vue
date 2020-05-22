@@ -53,7 +53,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters, mapMutations } from "vuex";
 
 export default {
@@ -104,8 +103,8 @@ export default {
     async editPost(e) {
       try {
         e.preventDefault();
-        const result = await axios.put(
-          `https://9bkfullstackd.com/strapi/posts/${this.post.id}`,
+        const result = await this.$backend.put(
+          `/posts/${this.post.id}`,
           {
             detail:
               (this.post.detail || "").trim() === "" ? null : this.post.detail

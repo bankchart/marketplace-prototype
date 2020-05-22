@@ -57,7 +57,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters, mapMutations } from "vuex";
 
 export default {
@@ -97,8 +96,8 @@ export default {
     async createPost(e) {
       try {
         e.preventDefault();
-        const result = await axios.post(
-          "https://9bkfullstackd.com/strapi/posts",
+        const result = await this.$backend.post(
+          "/posts",
           {
             title: this.post.title,
             detail:

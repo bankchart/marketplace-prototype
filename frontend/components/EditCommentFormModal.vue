@@ -37,7 +37,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters, mapMutations } from "vuex";
 
 export default {
@@ -85,8 +84,8 @@ export default {
     async editComment(e) {
       try {
         e.preventDefault();
-        const result = await axios.put(
-          `https://9bkfullstackd.com/strapi/comments/${this.comment.id}`,
+        const result = await this.$backend.put(
+          `/comments/${this.comment.id}`,
           {
             content:
               (this.comment.content || "").trim() === ""

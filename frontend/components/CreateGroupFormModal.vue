@@ -72,7 +72,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters, mapMutations } from "vuex";
 
 export default {
@@ -109,8 +108,8 @@ export default {
           imageId = await this.uploadImage();
         }
 
-        const result = await axios.post(
-          "https://9bkfullstackd.com/strapi/groups",
+        const result = await this.$backend.post(
+          "/groups",
           {
             name: this.group.name,
             university: this.group.university,
@@ -148,15 +147,11 @@ export default {
       const formData = new FormData();
       const imageFile = document.querySelector("#groupPicture");
       formData.append("files", imageFile.files[0]);
-      const result = await axios.post(
-        "https://9bkfullstackd.com/strapi/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
+      const result = await this.$backend.post("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
         }
-      );
+      });
       return result.data[0].id;
     }
   }

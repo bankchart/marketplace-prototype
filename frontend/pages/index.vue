@@ -26,7 +26,7 @@
           <div class="card-image">
             <figure class="image is-4by3">
               <img
-                :src="`/strapi${grp.profile_picture.url}`"
+                :src="`${$axios.defaults.baseURL}/${grp.profile_picture.url}`"
                 alt="Placeholder image"
               />
             </figure>
@@ -63,7 +63,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapMutations, mapGetters } from "vuex";
 
 export default {
@@ -82,15 +81,12 @@ export default {
 
   async mounted() {
     try {
-      const regResult = await axios.post(
-        "https://9bkfullstackd.com/strapi/register-api",
-        {
-          facebook_userid: this.$auth.user.id,
-          email: this.$auth.user.email,
-          name: this.$auth.user.name,
-          picture_profile: this.$auth.user.picture.data.url
-        }
-      );
+      const regResult = await this.$backend.post("/register-api", {
+        facebook_userid: this.$auth.user.id,
+        email: this.$auth.user.email,
+        name: this.$auth.user.name,
+        picture_profile: this.$auth.user.picture.data.url
+      });
 
       this.addJwt(regResult.data.jwt);
       this.setUserId(regResult.data.userId);
@@ -98,9 +94,7 @@ export default {
       localStorage.setItem("jwt", regResult.data.jwt);
       localStorage.setItem("userId", regResult.data.userId);
 
-      const groupResult = await axios.get(
-        "https://9bkfullstackd.com/strapi/groups"
-      );
+      const groupResult = await this.$backend.get("/groups");
       let indexBreak = 3;
       let subGroupRow = [];
       for (const i in groupResult.data) {

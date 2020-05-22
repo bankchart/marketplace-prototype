@@ -1,3 +1,4 @@
+require("dotenv").config();
 export default {
   mode: "spa",
   router: {
@@ -58,7 +59,10 @@ export default {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: [{ src: "~plugins/nuxt-quill-plugin", ssr: false }],
+  plugins: [
+    { src: "~plugins/nuxt-quill-plugin", ssr: false },
+    "~plugins/nuxt-axios.js"
+  ],
   /*
    ** Nuxt.js dev-modules
    */
@@ -73,6 +77,7 @@ export default {
     // Doc: https://axios.nuxtjs.org/usage
     "@nuxtjs/axios",
     "@nuxtjs/auth",
+    "@nuxtjs/dotenv",
     [
       "nuxt-fontawesome",
       {
@@ -95,7 +100,10 @@ export default {
    ** See https://axios.nuxtjs.org/options
    */
   axios: {
-    // baseURL: "https://localhost"
+    baseURL:
+      process.env.MARKET_ENV === "dev"
+        ? "https://localhost/strapi"
+        : "https://9bkfullstackd.com/strapi"
   },
   /*
    ** Build configuration
