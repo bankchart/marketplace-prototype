@@ -102,6 +102,7 @@ export default {
 
     async createGroup(e) {
       try {
+        e.preventDefault();
         let imageId = null;
         const imageFile = document.querySelector("#groupPicture");
         if (imageFile.files[0]) {
@@ -125,8 +126,6 @@ export default {
           }
         );
         this.setShowCreateGroupModal(false);
-        e.preventDefault();
-        window.location.reload();
       } catch (e) {
         this.error = e.message;
       }

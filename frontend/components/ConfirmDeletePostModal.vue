@@ -64,12 +64,28 @@ export default {
       try {
         e.preventDefault();
         const postId = this.propsConfirmDeletePostModal.postId;
-        // TODO: delete post by only owner post
-        const result = await this.$backend.delete(`/posts/${postId}`, {
-          headers: {
-            Authorization: `Bearer ${this.jwtToken}`
+        const mutation = `
+        mutation($postId: ID!) {
+          deletePost(input: { where: { id: $postId } }) {
+            post {
+              id
+              title
+            }
           }
-        });
+        }`;
+        const variables = { postId };
+        const result = await this.$backend.post(
+          `/graphql`,
+          {
+            query: mutation,
+            variables
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.jwtToken}`
+            }
+          }
+        );
         this.resetPropsConfirmDeletePost();
         this.setShowConfirmDeletePostModal(false);
         this.setForceLoadPost(true);
