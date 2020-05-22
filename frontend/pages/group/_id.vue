@@ -236,9 +236,9 @@ export default {
           query: `
             query {
               groups {
-                name,
+                name
                 owner {
-                  id,
+                  id
                   username
                 }
               }

@@ -62,8 +62,6 @@ module.exports = {
             picture_profile
           }
         );
-        console.log(loginResult.data.user);
-        console.log(loginResult.data.jwt);
         ctx.body = {
           userId: loginResult.data.user.id,
           jwt: loginResult.data.jwt
