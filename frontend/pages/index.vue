@@ -26,7 +26,7 @@
           <div class="card-image">
             <figure class="image is-4by3">
               <img
-                :src="`https://localhost${grp.profile_picture.url}`"
+                :src="`/strapi${grp.profile_picture.url}`"
                 alt="Placeholder image"
               />
             </figure>
@@ -73,19 +73,34 @@ export default {
     };
   },
 
+  computed: {
+    ...mapGetters({
+      jwtToken: "jwtToken",
+      userId: "userId"
+    })
+  },
+
   async mounted() {
     try {
-      console.log(this.$auth.user);
-      const regResult = await axios.post("https://localhost/register-api", {
-        facebook_userid: this.$auth.user.id,
-        email: this.$auth.user.email,
-        name: this.$auth.user.name,
-        picture_profile: this.$auth.user.picture.data.url
-      });
+      const regResult = await axios.post(
+        "https://9bkfullstackd.com/strapi/register-api",
+        {
+          facebook_userid: this.$auth.user.id,
+          email: this.$auth.user.email,
+          name: this.$auth.user.name,
+          picture_profile: this.$auth.user.picture.data.url
+        }
+      );
 
       this.addJwt(regResult.data.jwt);
       this.setUserId(regResult.data.userId);
-      const groupResult = await axios.get("https://localhost/groups");
+
+      localStorage.setItem("jwt", regResult.data.jwt);
+      localStorage.setItem("userId", regResult.data.userId);
+
+      const groupResult = await axios.get(
+        "https://9bkfullstackd.com/strapi/groups"
+      );
       let indexBreak = 3;
       let subGroupRow = [];
       for (const i in groupResult.data) {
@@ -99,17 +114,9 @@ export default {
           this.groups.push([...subGroupRow]);
         }
       }
-      console.log(this.groups);
     } catch (e) {
       console.error(e);
     }
-  },
-
-  computed: {
-    ...mapGetters({
-      jwtToken: "jwtToken",
-      userId: "userId"
-    })
   },
 
   methods: {

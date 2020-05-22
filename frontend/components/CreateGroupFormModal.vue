@@ -50,7 +50,7 @@
                 @change="previewImage"
               />
               <div v-if="group.imageData.length > 0" class="image-preview">
-                <img class="preview" :src="group.imageData" />
+                <img class="preview" :src="`${group.imageData}`" />
               </div>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default {
         }
 
         const result = await axios.post(
-          "https://localhost/groups",
+          "https://9bkfullstackd.com/strapi/groups",
           {
             name: this.group.name,
             university: this.group.university,
@@ -148,11 +148,15 @@ export default {
       const formData = new FormData();
       const imageFile = document.querySelector("#groupPicture");
       formData.append("files", imageFile.files[0]);
-      const result = await axios.post("https://localhost/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
+      const result = await axios.post(
+        "https://9bkfullstackd.com/strapi/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
         }
-      });
+      );
       return result.data[0].id;
     }
   }

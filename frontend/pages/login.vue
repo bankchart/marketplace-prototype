@@ -34,10 +34,6 @@ export default {
     };
   },
 
-  mounted() {
-    console.log(this.$auth);
-  },
-
   methods: {
     async login() {
       try {

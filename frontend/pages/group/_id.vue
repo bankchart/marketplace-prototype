@@ -6,7 +6,6 @@
           <a href="#" @click="$router.push('/')">
             <span class="icon is-small">
               <fa :icon="['fas', 'home']" />
-              <i class="fas fa-home"></i>
             </span>
             <span>Marketplace</span>
           </a>
@@ -31,7 +30,7 @@
     <div class="field has-addons has-addons">
       <p class="control">
         <span class="select">
-          <select v-model="search.filterBy">
+          <select v-model="search.filterBy" disabled>
             <option value="postName">ชื่อโพสต์</option>
             <option value="postOwner">เจ้าของโพสต์</option>
           </select>
@@ -58,6 +57,33 @@
             </p>
           </figure>
           <div class="media-content">
+            <template v-if="parseInt(userId) === post.owner.id">
+              <button
+                class="delete is-pulled-right"
+                aria-label="close"
+                @click="
+                  triggerOpenConfirmDeleteModal(
+                    post.id,
+                    post.title,
+                    $route.params.id
+                  )
+                "
+              ></button>
+              <span
+                class="icon is-pulled-right edit-icon"
+                style="cursor: pointer;"
+                @click="
+                  triggerOpenEditPostModal(
+                    post.id,
+                    post.title,
+                    post.detail,
+                    $route.params.id
+                  )
+                "
+              >
+                <fa :icon="['fas', 'edit']" />
+              </span>
+            </template>
             <div class="content">
               <p>
                 <small
@@ -70,7 +96,7 @@
                   ><strong>{{ post.title }}</strong></small
                 >
                 <br />
-                {{ post.detail }}
+                <span v-html="post.detail"></span>
                 <br />
               </p>
             </div>
@@ -86,6 +112,27 @@
                 </p>
               </figure>
               <div class="media-content">
+                <template v-if="parseInt(userId) === comment.owner">
+                  <button
+                    class="delete is-pulled-right"
+                    aria-label="close"
+                    @click="
+                      triggerOpenConfirmDeleteCommentModal(
+                        comment.id,
+                        comment.content
+                      )
+                    "
+                  ></button>
+                  <span
+                    class="icon is-pulled-right edit-icon"
+                    style="cursor: pointer;"
+                    @click="
+                      triggerOpenEditCommentModal(comment.id, comment.content)
+                    "
+                  >
+                    <fa :icon="['fas', 'edit']" />
+                  </span>
+                </template>
                 <div class="content">
                   <p>
                     <small
@@ -94,7 +141,7 @@
                       {{ comment.owner_name }}
                     </small>
                     <br />
-                    {{ comment.content }}
+                    <span v-html="comment.content"></span>
                     <br />
                   </p>
                 </div>
@@ -144,7 +191,7 @@
 
 <script>
 import axios from "axios";
-import { mapMutations, mapGetters } from "vuex";
+import { mapMutations, mapGetters, mapState } from "vuex";
 
 export default {
   data() {
@@ -152,7 +199,7 @@ export default {
       groupName: null,
       search: {
         filterBy: "postName",
-        value: null
+        value: ""
       },
       savingComment: false,
       ready: false,
@@ -160,31 +207,61 @@ export default {
     };
   },
 
-  async mounted() {
-    await this.loadPosts();
-  },
-
   computed: {
     ...mapGetters({
       userId: "userId",
       jwtToken: "jwtToken"
-    })
+    }),
+    ...mapState(["forceLoadPost"])
+  },
+
+  watch: {
+    async forceLoadPost(newValue, oldValue) {
+      if (newValue) {
+        await this.loadPosts();
+        this.setForceLoadPost(false);
+      }
+    }
+  },
+
+  async mounted() {
+    await this.loadPosts();
   },
 
   methods: {
-    async loadPosts() {
+    triggerOpenConfirmDeleteModal(postId, postName, groupId) {
+      this.setPropsConfirmDeletePost({ postId, postName, groupId });
+      this.setShowConfirmDeletePostModal(true);
+    },
+    triggerOpenEditPostModal(postId, postName, postDetail, groupId) {
+      this.setPropsEditPost({ postId, postName, postDetail, groupId });
+      this.setShowEditPostModal(true);
+    },
+    triggerOpenConfirmDeleteCommentModal(commentId, commentContent) {
+      this.setPropsConfirmDeleteComment({ commentId, commentContent });
+      this.setShowConfirmDeleteCommentModal(true);
+    },
+    triggerOpenEditCommentModal(commentId, commentContent) {
+      this.setPropsEditComment({ commentId, commentContent });
+      this.setShowEditCommentModal(true);
+    },
+    async loadPosts(fromSearch = null) {
       try {
         this.ready = false;
-        const result = await axios.get(
-          `https://localhost/groups/${this.$route.params.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.jwtToken}`
+        if (!fromSearch) {
+          const result = await axios.get(
+            `https://9bkfullstackd.com/strapi/groups/${this.$route.params.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${this.jwtToken}`
+              }
             }
-          }
-        );
-        this.groupName = result.data.name;
-        this.posts = result.data.posts || [];
+          );
+          this.groupName = result.data.name;
+          this.posts = result.data.posts || [];
+        } else {
+          this.posts = fromSearch;
+        }
         for (const post in this.posts) {
           const postIndex = parseInt(post);
           const postTmp = await this.getPostById(this.posts[postIndex].id);
@@ -201,7 +278,6 @@ export default {
           }
         }
         this.ready = true;
-        console.log(this.posts);
       } catch (e) {
         console.error(e);
       }
@@ -209,37 +285,31 @@ export default {
     async createComment(postId) {
       await this.$nextTick(async () => {
         try {
-          this.savingComment = true;
           const postComment = this.$refs[`comment_${postId}`][0].value.trim();
-          this.$refs[`button_${postId}`][0].classList.remove("is-loading");
-          this.$refs[`button_${postId}`][0].classList.add("is-loading");
+          if (postComment.length > 0) {
+            this.savingComment = true;
+            this.$refs[`button_${postId}`][0].classList.remove("is-loading");
+            this.$refs[`button_${postId}`][0].classList.add("is-loading");
 
-          // const test = new Promise(resolve => {
-          //   setTimeout(() => {
-          //     resolve();
-          //   }, 1000);
-          // });
-
-          // await test;
-
-          const result = await axios.post(
-            "https://localhost/comments",
-            {
-              content: postComment,
-              post: postId,
-              owner: this.userId
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${this.jwtToken}`
+            const result = await axios.post(
+              "https://9bkfullstackd.com/strapi/comments",
+              {
+                content: postComment,
+                post: postId,
+                owner: this.userId
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${this.jwtToken}`
+                }
               }
-            }
-          );
+            );
 
-          this.savingComment = false;
-          this.$refs[`button_${postId}`][0].classList.remove("is-loading");
-          this.$refs[`comment_${postId}`][0].value = "";
-          await this.loadPosts();
+            this.savingComment = false;
+            this.$refs[`button_${postId}`][0].classList.remove("is-loading");
+            this.$refs[`comment_${postId}`][0].value = "";
+            await this.loadPosts();
+          }
         } catch (e) {
           console.error(e);
           this.savingComment = false;
@@ -249,11 +319,14 @@ export default {
     },
     async getPostById(id) {
       try {
-        const result = await axios.get(`https://localhost/posts/${id}`, {
-          headers: {
-            Authorization: `Bearer ${this.jwtToken}`
+        const result = await axios.get(
+          `https://9bkfullstackd.com/strapi/posts/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.jwtToken}`
+            }
           }
-        });
+        );
         return result.data;
       } catch (e) {
         console.error(e);
@@ -261,20 +334,60 @@ export default {
     },
     async getUserById(id) {
       try {
-        const result = await axios.get(`https://localhost/users/${id}`);
+        const result = await axios.get(
+          `https://9bkfullstackd.com/strapi/users/${id}`
+        );
         return result.data;
       } catch (e) {
         console.error(e);
       }
     },
-    onSearch() {
-      console.log(this.search);
+    async onSearch() {
+      try {
+        if (this.search.value.trim().length > 0) {
+          const result = await axios.get(
+            `https://9bkfullstackd.com/strapi/posts`,
+            {
+              headers: {
+                Authorization: `Bearer ${this.jwtToken}`
+              },
+              params: {
+                title_contains: this.search.value.trim(),
+                group_eq: this.$route.params.id
+              }
+            }
+          );
+          this.loadPosts(result.data);
+        } else {
+          this.loadPosts();
+        }
+      } catch (e) {
+        console.error(e);
+      }
     },
     ...mapMutations({
-      setShowCreatePostModal: "setShowCreatePostModal"
+      setShowCreatePostModal: "setShowCreatePostModal",
+      setShowEditPostModal: "setShowEditPostModal",
+      setShowEditCommentModal: "setShowEditCommentModal",
+      setForceLoadPost: "setForceLoadPost",
+      setShowConfirmDeletePostModal: "setShowConfirmDeletePostModal",
+      setShowConfirmDeleteCommentModal: "setShowConfirmDeleteCommentModal",
+      setPropsConfirmDeletePost: "setPropsConfirmDeletePost",
+      setPropsConfirmDeleteComment: "setPropsConfirmDeleteComment",
+      setPropsEditPost: "setPropsEditPost",
+      setPropsEditComment: "setPropsEditComment",
+      resetPropsConfirmDeletePost: "resetPropsConfirmDeletePost",
+      resetPropsConfirmDeleteComment: "resetPropsConfirmDeleteComment"
     })
   }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.edit-icon {
+  margin-right: 20px;
+  margin-top: -3px;
+  font-size: 20px;
+  color: #c9c9c9;
+}
+</style>

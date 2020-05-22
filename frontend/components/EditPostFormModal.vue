@@ -3,19 +3,15 @@
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
-        <p class="modal-card-title">สร้างโพสต์</p>
-        <button
-          class="delete"
-          aria-label="close"
-          @click="setShowCreatePostModal(false)"
-        ></button>
+        <p class="modal-card-title">แก้ไขโพสต์</p>
+        <button class="delete" aria-label="close" @click="closeModal"></button>
       </header>
       <section class="modal-card-body">
         <div>
           <div class="field">
             <label class="label">ชื่อโพสต์</label>
             <div class="control">
-              <input v-model="post.title" class="input" type="text" />
+              <input v-model="post.title" disabled class="input" type="text" />
             </div>
           </div>
 
@@ -42,8 +38,8 @@
         </div>
       </section>
       <footer class="modal-card-foot">
-        <button class="button is-success" @click="createPost">สร้าง</button>
-        <button class="button" @click="setShowCreatePostModal(false)">
+        <button class="button is-success" @click="editPost">แก้ไข</button>
+        <button class="button" @click="closeModal()">
           ยกเลิก
         </button>
         <article v-if="error" class="message is-danger">
@@ -65,6 +61,7 @@ export default {
     return {
       error: null,
       post: {
+        id: null,
         title: null,
         detail: null,
         keywords: "product"
@@ -84,28 +81,34 @@ export default {
   computed: {
     ...mapGetters({
       userId: "userId",
-      jwtToken: "jwtToken"
+      jwtToken: "jwtToken",
+      propsEditPostModal: "propsEditPostModal"
     })
+  },
+
+  mounted() {
+    Object.assign(this.post, {
+      id: this.propsEditPostModal.postId,
+      title: this.propsEditPostModal.postName,
+      detail: this.propsEditPostModal.postDetail
+    });
   },
 
   methods: {
     ...mapMutations({
-      setShowCreatePostModal: "setShowCreatePostModal",
-      setForceLoadPost: "setForceLoadPost"
+      setShowEditPostModal: "setShowEditPostModal",
+      setForceLoadPost: "setForceLoadPost",
+      resetPropsEditPost: "resetPropsEditPost"
     }),
 
-    async createPost(e) {
+    async editPost(e) {
       try {
         e.preventDefault();
-        const result = await axios.post(
-          "https://9bkfullstackd.com/strapi/posts",
+        const result = await axios.put(
+          `https://9bkfullstackd.com/strapi/posts/${this.post.id}`,
           {
-            title: this.post.title,
             detail:
-              (this.post.detail || "").trim() === "" ? null : this.post.detail,
-            keywords: this.post.keywords,
-            group: this.$route.params.id,
-            owner: this.userId
+              (this.post.detail || "").trim() === "" ? null : this.post.detail
           },
           {
             headers: {
@@ -113,11 +116,16 @@ export default {
             }
           }
         );
-        this.setShowCreatePostModal(false);
+        this.resetPropsEditPost();
+        this.setShowEditPostModal(false);
         this.setForceLoadPost(true);
       } catch (e) {
         this.error = e.message;
       }
+    },
+    closeModal() {
+      this.setShowEditPostModal(false);
+      this.resetPropsEditPost();
     }
   }
 };

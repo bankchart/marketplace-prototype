@@ -1,15 +1,18 @@
 export default {
-  mode: "universal",
+  mode: "spa",
   router: {
-    middleware: ["auth"]
+    // mode: "hash",
+    middleware: ["auth", "appMiddleware"]
   },
   auth: {
     strategies: {
       facebook: {
         client_id: "823538334721258",
+        authorization_endpoint: "https://facebook.com/v2.12/dialog/oauth",
         userinfo_endpoint:
-          "https://graph.facebook.com/v2.12/me?fields=about,name,picture{url},email,birthday",
-        scope: ["public_profile", "email", "user_birthday"]
+          "https://graph.facebook.com/v2.12/me?fields=about,name,picture{url},email",
+        scope: ["public_profile", "email"]
+        // redirect_uri: "https://9bkfullstackd.com/login"
       }
     }
   },
@@ -43,11 +46,19 @@ export default {
   /*
    ** Global CSS
    */
-  css: [],
+  css: [
+    // ...
+    "node_modules/quill/dist/quill.core.css",
+    // for snow theme
+    "node_modules/quill/dist/quill.snow.css",
+    // for bubble theme
+    "node_modules/quill/dist/quill.bubble.css"
+    // ...
+  ],
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: [],
+  plugins: [{ src: "~plugins/nuxt-quill-plugin", ssr: false }],
   /*
    ** Nuxt.js dev-modules
    */
