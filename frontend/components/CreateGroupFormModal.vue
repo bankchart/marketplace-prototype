@@ -107,6 +107,8 @@ export default {
         const imageFile = document.querySelector("#groupPicture");
         if (imageFile.files[0]) {
           imageId = await this.uploadImage();
+        } else {
+          throw new Error("กรุณาใส่รูปกลุ่ม");
         }
 
         const result = await this.$backend.post(
@@ -126,6 +128,7 @@ export default {
           }
         );
         this.setShowCreateGroupModal(false);
+        window.location.reload();
       } catch (e) {
         this.error = e.message;
       }

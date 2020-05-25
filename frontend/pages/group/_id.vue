@@ -158,13 +158,13 @@
           <div class="media-content">
             <div class="field">
               <p class="control">
-                <textarea
-                  :ref="`comment_${post.id}`"
-                  class="textarea"
-                  rows="3"
-                  style="resize: none"
-                  placeholder="แสดงความคิดเห็น"
-                ></textarea>
+                <client-only>
+                  <quill-editor
+                    :ref="`comment_${post.id}`"
+                    :options="editorOption"
+                    style="background-color: #FFFFFF;"
+                  />
+                </client-only>
               </p>
             </div>
             <div class="field">
@@ -202,7 +202,16 @@ export default {
       },
       savingComment: false,
       ready: false,
-      posts: []
+      posts: [],
+      editorOption: {
+        theme: "snow",
+        modules: {
+          toolbar: [
+            ["bold", "italic", "underline", "strike"],
+            ["blockquote", "image"]
+          ]
+        }
+      }
     };
   },
 
@@ -308,7 +317,9 @@ export default {
     async createComment(postId) {
       await this.$nextTick(async () => {
         try {
-          const postComment = this.$refs[`comment_${postId}`][0].value.trim();
+          const postComment = (
+            this.$refs[`comment_${postId}`][0]._content || ""
+          ).trim();
           if (postComment.length > 0) {
             this.savingComment = true;
             this.$refs[`button_${postId}`][0].classList.remove("is-loading");

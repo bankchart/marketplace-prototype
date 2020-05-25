@@ -25,10 +25,7 @@
         >
           <div class="card-image">
             <figure class="image is-4by3">
-              <img
-                :src="`${$axios.defaults.baseURL}/${grp.profile_picture.url}`"
-                alt="Placeholder image"
-              />
+              <img :src="getGroupImage(grp)" alt="Placeholder image" />
             </figure>
           </div>
           <div class="card-content">
@@ -118,7 +115,14 @@ export default {
       addJwt: "addJwt",
       setUserId: "setUserId",
       setShowCreateGroupModal: "setShowCreateGroupModal"
-    })
+    }),
+    getGroupImage(group) {
+      let image = require("~/assets/social.png");
+      if (group.profile_picture) {
+        image = `${this.$axios.defaults.baseURL}/${group.profile_picture.url}`;
+      }
+      return image;
+    }
   }
 };
 </script>

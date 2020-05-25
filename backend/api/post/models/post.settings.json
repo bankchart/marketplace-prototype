@@ -30,8 +30,8 @@
       "required": true
     },
     "group": {
-      "model": "group",
-      "via": "posts"
+      "via": "posts",
+      "model": "group"
     },
     "owner": {
       "plugin": "users-permissions",

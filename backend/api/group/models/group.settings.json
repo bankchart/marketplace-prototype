@@ -25,7 +25,7 @@
         "images"
       ],
       "plugin": "upload",
-      "required": false
+      "required": true
     },
     "major": {
       "type": "string"
@@ -38,8 +38,8 @@
       "model": "user"
     },
     "posts": {
-      "via": "group",
-      "collection": "post"
+      "collection": "post",
+      "via": "group"
     }
   }
 }
