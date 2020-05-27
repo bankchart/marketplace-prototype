@@ -216,11 +216,7 @@ export default {
       editorOption: {
         theme: "snow",
         modules: {
-          toolbar: [
-            // ["bold", "italic", "underline", "strike"],
-            // ["blockquote", "image"]
-            ["image"]
-          ]
+          toolbar: [["image"]]
         }
       }
     };
@@ -284,29 +280,29 @@ export default {
                   id
                   name
                   posts {
+                    id
+                    title
+                    detail
+                    comments {
                       id
-                      title
-                      detail
-                      comments {
-                          id
-                          content
-                          owner {
-                              id
-                              first_name
-                              last_name
-                              picture_profile
-                          }
-                      }
+                      content
                       owner {
-                          id
-                          first_name
-                          last_name
-                          picture_profile
+                        id
+                        first_name
+                        last_name
+                        picture_profile
                       }
-                      categories {
+                    }
+                    owner {
+                      id
+                      first_name
+                      last_name
+                      picture_profile
+                    }
+                    categories {
                       id
                       name
-                  }
+                    }
                   }
               }
           }`;
@@ -374,16 +370,49 @@ export default {
     async onSearch() {
       try {
         if (this.search.value.trim().length > 0) {
-          const result = await this.$backend.get(`/posts`, {
-            headers: {
-              Authorization: `Bearer ${this.jwtToken}`
+          const result = await this.$backend.post(
+            "/graphql",
+            {
+              query: `
+              query ($title: String!){
+                posts (where: { title_contains: $title }) {
+                  id
+                  title
+                  detail
+                  comments {
+                    id
+                    content
+                    owner {
+                      id
+                      first_name
+                      last_name
+                      picture_profile
+                    }
+                  }
+                  owner {
+                    id
+                    first_name
+                    last_name
+                    picture_profile
+                  }
+                  categories {
+                    id
+                    name
+                  }
+                }
+              }
+              `,
+              variables: {
+                title: this.search.value.trim()
+              }
             },
-            params: {
-              title_contains: this.search.value.trim(),
-              group_eq: this.$route.params.id
+            {
+              headers: {
+                Authorization: `Bearer ${this.jwtToken}`
+              }
             }
-          });
-          this.loadPosts(result.data);
+          );
+          this.loadPosts(result.data.data.posts);
         } else {
           this.loadPosts();
         }
@@ -422,6 +451,5 @@ export default {
 .custom-tag:hover {
   cursor: pointer;
   background-color: #209ceea3 !important;
-  /* color: #5e8bae !important; */
 }
 </style>

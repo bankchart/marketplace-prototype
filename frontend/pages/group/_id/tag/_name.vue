@@ -115,11 +115,7 @@ export default {
       editorOption: {
         theme: "snow",
         modules: {
-          toolbar: [
-            // ["bold", "italic", "underline", "strike"],
-            // ["blockquote", "image"]
-            ["image"]
-          ]
+          toolbar: [["image"]]
         }
       }
     };
