@@ -69,8 +69,9 @@ export default {
         theme: "snow",
         modules: {
           toolbar: [
-            ["bold", "italic", "underline", "strike"],
-            ["blockquote", "image"]
+            // ["bold", "italic", "underline", "strike"],
+            // ["blockquote", "image"]
+            ["image"]
           ]
         }
       }

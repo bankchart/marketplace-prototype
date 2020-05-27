@@ -17,9 +17,6 @@
       "type": "richtext",
       "required": true
     },
-    "categories": {
-      "collection": "category"
-    },
     "keywords": {
       "type": "enumeration",
       "enum": [
@@ -30,8 +27,8 @@
       "required": true
     },
     "group": {
-      "via": "posts",
-      "model": "group"
+      "model": "group",
+      "via": "posts"
     },
     "owner": {
       "plugin": "users-permissions",
@@ -40,6 +37,10 @@
     "comments": {
       "collection": "comment",
       "via": "post"
+    },
+    "categories": {
+      "via": "posts",
+      "collection": "category"
     }
   }
 }

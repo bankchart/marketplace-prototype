@@ -1,0 +1,20 @@
+{
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/tags-api",
+      "handler": "tags-api.newTags",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/tags-api/posts",
+      "handler": "tags-api.posts",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

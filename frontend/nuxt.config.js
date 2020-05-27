@@ -61,6 +61,7 @@ export default {
    */
   plugins: [
     { src: "~plugins/nuxt-quill-plugin", ssr: false },
+    { src: "~/plugins/vue-tags-input", ssr: false },
     "~plugins/nuxt-axios.js"
   ],
   /*
@@ -103,7 +104,8 @@ export default {
     baseURL:
       process.env.MARKET_ENV === "dev"
         ? "https://localhost/strapi"
-        : "https://9bkfullstackd.com/strapi"
+        : // : "https://9bkfullstackd.com/strapi"
+          "https://36c582b5.ngrok.io"
   },
   /*
    ** Build configuration
@@ -112,6 +114,7 @@ export default {
     /*
      ** You can extend webpack config here
      */
+    vendor: ["@johmun/vue-tags-input"],
     extend(config, ctx) {}
   }
 };

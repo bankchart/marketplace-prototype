@@ -20,6 +20,20 @@
           </div>
 
           <div class="field">
+            <label class="label">แท็ก</label>
+            <div class="contorl">
+              <vue-tags-input
+                v-model="tag"
+                placeholder=""
+                :tags="tags"
+                :autocomplete-items="filteredItems"
+                @tags-changed="newTags => (tags = newTags)"
+                @before-adding-tag="checkDupTag"
+              />
+            </div>
+          </div>
+
+          <div class="field">
             <label class="label">รายละเอียด</label>
             <div class="control">
               <client-only>
@@ -72,11 +86,16 @@ export default {
         theme: "snow",
         modules: {
           toolbar: [
-            ["bold", "italic", "underline", "strike"],
-            ["blockquote", "image"]
+            // ["bold", "italic", "underline", "strike"],
+            // ["blockquote", "image"]
+            ["image"]
           ]
-        }
-      }
+        },
+        placeholder: ""
+      },
+      tag: "",
+      tags: [],
+      autocompleteItems: []
     };
   },
 
@@ -84,7 +103,16 @@ export default {
     ...mapGetters({
       userId: "userId",
       jwtToken: "jwtToken"
-    })
+    }),
+    filteredItems() {
+      return this.autocompleteItems.filter(i => {
+        return i.text.toLowerCase().includes(this.tag.toLowerCase());
+      });
+    }
+  },
+
+  async mounted() {
+    this.autocompleteItems = await this.loadTags();
   },
 
   methods: {
@@ -96,6 +124,46 @@ export default {
     async createPost(e) {
       try {
         e.preventDefault();
+        const postTags = [];
+        for (const tag of this.tags) {
+          postTags.push(parseInt(tag.id));
+        }
+
+        const tempAutocompleteItems = [];
+        const tempTags = [];
+
+        this.autocompleteItems.forEach(tag => {
+          tempAutocompleteItems.push(tag.text);
+        });
+
+        this.tags.forEach(tag => {
+          tempTags.push(tag.text);
+        });
+
+        const difference = tempTags.filter(
+          tag => !tempAutocompleteItems.includes(tag)
+        );
+
+        let newTagsResult = {};
+
+        if (difference.length > 0) {
+          newTagsResult = await this.$backend.post(
+            "/tags-api",
+            {
+              tags: difference
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${this.jwtToken}`
+              }
+            }
+          );
+        } else {
+          newTagsResult = {
+            data: { tags: [] }
+          };
+        }
+
         const result = await this.$backend.post(
           "/posts",
           {
@@ -104,7 +172,8 @@ export default {
               (this.post.detail || "").trim() === "" ? null : this.post.detail,
             keywords: this.post.keywords,
             group: this.$route.params.id,
-            owner: this.userId
+            owner: this.userId,
+            categories: [...new Set([...postTags, ...newTagsResult.data.tags])]
           },
           {
             headers: {
@@ -117,7 +186,53 @@ export default {
       } catch (e) {
         this.error = e.message;
       }
+    },
+
+    async loadTags() {
+      const result = await this.$backend.post(
+        "/graphql",
+        {
+          query: `
+            query {
+              categories {
+                id
+                text: name
+              }
+            }
+          `
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.jwtToken}`
+          }
+        }
+      );
+      return result.data.data.categories;
+    },
+
+    checkDupTag(obj) {
+      let add = true;
+      for (const tag of this.tags) {
+        if (obj.tag.text.toLowerCase().trim() === tag.text.toLowerCase()) {
+          this.tag = "";
+          add = false;
+          break;
+        }
+      }
+      if (add) {
+        obj.addTag();
+      }
     }
   }
 };
 </script>
+
+<style lang="css" scoped>
+.vue-tags-input {
+  max-width: none !important;
+}
+.input {
+  border-radius: 0px;
+  box-shadow: none;
+}
+</style>

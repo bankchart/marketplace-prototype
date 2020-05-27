@@ -32,7 +32,7 @@
             <div class="media">
               <div class="media-left">
                 <figure class="image is-48x48">
-                  <img src="~assets/user.svg" alt="Placeholder image" />
+                  <img :src="grp.owner.picture_profile" />
                 </figure>
               </div>
               <div class="media-content">
@@ -49,7 +49,14 @@
               <br />
               <i style="font-size: 13px">
                 วันที่สร้างกลุ่ม:
-                <time :datetime="grp.updated_at">{{ grp.created_at }}</time>
+                <time :datetime="grp.updated_at"
+                  >{{
+                    new Date(grp.created_at).toLocaleString("th-TH", {
+                      timeZone: "Asia/Bangkok"
+                    })
+                  }}
+                  น.</time
+                >
               </i>
             </div>
           </div>
@@ -91,17 +98,48 @@ export default {
       localStorage.setItem("jwt", regResult.data.jwt);
       localStorage.setItem("userId", regResult.data.userId);
 
-      const groupResult = await this.$backend.get("/groups");
+      const groupResult = await this.$backend.post(
+        "/graphql",
+        {
+          query: `
+          query {
+            groups {
+              id
+              name
+              major
+              class
+              university
+              profile_picture {
+                url
+              }
+              owner {
+                id
+                first_name
+                last_name
+                picture_profile
+              }
+              created_at
+            }
+          }
+          `
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.jwtToken}`
+          }
+        }
+      );
+
       let indexBreak = 3;
       let subGroupRow = [];
-      for (const i in groupResult.data) {
+      for (const i in groupResult.data.data.groups) {
         indexBreak--;
-        subGroupRow.push(groupResult.data[i]);
+        subGroupRow.push(groupResult.data.data.groups[i]);
         if (indexBreak === 0) {
           indexBreak = 3;
           this.groups.push([...subGroupRow]);
           subGroupRow = [];
-        } else if (parseInt(i) === groupResult.data.length - 1) {
+        } else if (parseInt(i) === groupResult.data.data.groups.length - 1) {
           this.groups.push([...subGroupRow]);
         }
       }
@@ -119,7 +157,7 @@ export default {
     getGroupImage(group) {
       let image = require("~/assets/social.png");
       if (group.profile_picture) {
-        image = `${this.$axios.defaults.baseURL}/${group.profile_picture.url}`;
+        image = `${this.$axios.defaults.baseURL}${group.profile_picture.url}`;
       }
       return image;
     }

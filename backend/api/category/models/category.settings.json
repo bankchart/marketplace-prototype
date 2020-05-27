@@ -13,6 +13,11 @@
       "type": "string",
       "required": true,
       "unique": true
+    },
+    "posts": {
+      "collection": "post",
+      "via": "categories",
+      "dominant": true
     }
   }
 }

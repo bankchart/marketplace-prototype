@@ -38,8 +38,8 @@
       "model": "user"
     },
     "posts": {
-      "collection": "post",
-      "via": "group"
+      "via": "group",
+      "collection": "post"
     }
   }
 }

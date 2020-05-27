@@ -43,21 +43,20 @@
         <a class="button is-primary" @click="onSearch">ค้นหา</a>
       </p>
     </div>
-
     <template v-if="ready && posts.length > 0">
       <div
         v-for="(post, index) in posts"
         :key="`post-${index}`"
         style="border: 1px solid rgba(232, 230, 227, 1); margin-bottom: 15px; padding: 15px; background-color: #F5F5F5;"
       >
-        <article class="media">
+        <article :id="post.id" :ref="`post_${post.id}`" class="media">
           <figure class="media-left">
             <p class="image is-64x64">
               <img :src="post.owner.picture_profile" />
             </p>
           </figure>
           <div class="media-content">
-            <template v-if="parseInt(userId) === post.owner.id">
+            <template v-if="userId === post.owner.id">
               <button
                 class="delete is-pulled-right"
                 aria-label="close"
@@ -99,6 +98,16 @@
                 <span v-html="post.detail"></span>
                 <br />
               </p>
+              <span
+                v-for="(tag, tagIndex) in post.categories"
+                :key="`tag-${tagIndex}`"
+                class="tag is-info is-light custom-tag"
+                style="margin-right: 5px"
+                @click="
+                  $router.push(`/group/${$route.params.id}/tag/${tag.name}`)
+                "
+                >{{ tag.name }}</span
+              >
             </div>
 
             <article
@@ -108,11 +117,11 @@
             >
               <figure class="media-left">
                 <p class="image is-48x48">
-                  <img :src="comment.picture_profile" />
+                  <img :src="comment.owner.picture_profile" />
                 </p>
               </figure>
               <div class="media-content">
-                <template v-if="parseInt(userId) === comment.owner">
+                <template v-if="userId === comment.owner.id">
                   <button
                     class="delete is-pulled-right"
                     aria-label="close"
@@ -138,7 +147,8 @@
                     <small
                       style="border-bottom: 1px solid #cccccc69; padding-bottom: 5px"
                     >
-                      {{ comment.owner_name }}
+                      {{ comment.owner.first_name }}
+                      {{ comment.owner.last_name }}
                     </small>
                     <br />
                     <span v-html="comment.content"></span>
@@ -207,8 +217,9 @@ export default {
         theme: "snow",
         modules: {
           toolbar: [
-            ["bold", "italic", "underline", "strike"],
-            ["blockquote", "image"]
+            // ["bold", "italic", "underline", "strike"],
+            // ["blockquote", "image"]
+            ["image"]
           ]
         }
       }
@@ -229,38 +240,25 @@ export default {
         await this.loadPosts();
         this.setForceLoadPost(false);
       }
+    },
+    ready(newValue, oldValue) {
+      if (newValue) {
+        this.$nextTick(() => {
+          if (this.$route.hash) {
+            const postId = this.$route.hash.substring(1);
+            const offsetTop = this.$refs[`post_${postId}`][0].offsetTop;
+            window.scrollTo(0, offsetTop);
+          }
+        });
+      }
     }
   },
 
   async mounted() {
     await this.loadPosts();
-    await this.test();
   },
 
   methods: {
-    async test() {
-      const result = await this.$backend.post(
-        "/graphql",
-        {
-          query: `
-            query {
-              groups {
-                name
-                owner {
-                  id
-                  username
-                }
-              }
-            }
-          `
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.jwtToken}`
-          }
-        }
-      );
-    },
     triggerOpenConfirmDeleteModal(postId, postName, groupId) {
       this.setPropsConfirmDeletePost({ postId, postName, groupId });
       this.setShowConfirmDeletePostModal(true);
@@ -281,33 +279,55 @@ export default {
       try {
         this.ready = false;
         if (!fromSearch) {
-          const result = await this.$backend.get(
-            `/groups/${this.$route.params.id}`,
+          const query = `query ($id: ID!) {
+              group (id: $id) {
+                  id
+                  name
+                  posts {
+                      id
+                      title
+                      detail
+                      comments {
+                          id
+                          content
+                          owner {
+                              id
+                              first_name
+                              last_name
+                              picture_profile
+                          }
+                      }
+                      owner {
+                          id
+                          first_name
+                          last_name
+                          picture_profile
+                      }
+                      categories {
+                      id
+                      name
+                  }
+                  }
+              }
+          }`;
+          const result = await this.$backend.post(
+            "/graphql",
+            {
+              query,
+              variables: {
+                id: this.$route.params.id
+              }
+            },
             {
               headers: {
                 Authorization: `Bearer ${this.jwtToken}`
               }
             }
           );
-          this.groupName = result.data.name;
-          this.posts = result.data.posts || [];
+          this.groupName = result.data.data.group.name;
+          this.posts = result.data.data.group.posts;
         } else {
           this.posts = fromSearch;
-        }
-        for (const post in this.posts) {
-          const postIndex = parseInt(post);
-          const postTmp = await this.getPostById(this.posts[postIndex].id);
-          Object.assign(this.posts[postIndex], postTmp);
-          for (const comment in this.posts[postIndex].comments) {
-            const commentIndex = parseInt(comment);
-            const user = await this.getUserById(
-              this.posts[postIndex].comments[commentIndex].owner
-            );
-            this.posts[postIndex].comments[commentIndex].picture_profile =
-              user.picture_profile;
-            this.posts[postIndex].comments[commentIndex].owner_name =
-              user.first_name + " " + user.last_name;
-          }
         }
         this.ready = true;
       } catch (e) {
@@ -350,26 +370,6 @@ export default {
           this.$refs[`button_${postId}`][0].classList.remove("is-loading");
         }
       });
-    },
-    async getPostById(id) {
-      try {
-        const result = await this.$backend.get(`/posts/${id}`, {
-          headers: {
-            Authorization: `Bearer ${this.jwtToken}`
-          }
-        });
-        return result.data;
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    async getUserById(id) {
-      try {
-        const result = await this.$backend.get(`/users/${id}`);
-        return result.data;
-      } catch (e) {
-        console.error(e);
-      }
     },
     async onSearch() {
       try {
@@ -415,5 +415,13 @@ export default {
   margin-top: -3px;
   font-size: 20px;
   color: #c9c9c9;
+}
+.content p {
+  margin-bottom: 0px;
+}
+.custom-tag:hover {
+  cursor: pointer;
+  background-color: #209ceea3 !important;
+  /* color: #5e8bae !important; */
 }
 </style>
