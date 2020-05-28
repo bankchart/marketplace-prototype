@@ -104,8 +104,7 @@ export default {
     baseURL:
       process.env.MARKET_ENV === "dev"
         ? "https://localhost/strapi"
-        : // : "https://9bkfullstackd.com/strapi"
-          "https://36c582b5.ngrok.io"
+        : "https://9bkfullstackd.com/strapi"
   },
   /*
    ** Build configuration

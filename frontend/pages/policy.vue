@@ -6,6 +6,6 @@
 
 <script>
 export default {
-  auth: "guest"
+  auth: false
 };
 </script>
