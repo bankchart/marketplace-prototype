@@ -47,7 +47,7 @@
       <div
         v-for="(post, index) in posts"
         :key="`post-${index}`"
-        style="border: 1px solid rgba(232, 230, 227, 1); margin-bottom: 15px; padding: 15px; background-color: #F5F5F5;"
+        class="post-detail"
       >
         <article :id="post.id" :ref="`post_${post.id}`" class="media">
           <figure class="media-left">
@@ -451,5 +451,11 @@ export default {
 .custom-tag:hover {
   cursor: pointer;
   background-color: #209ceea3 !important;
+}
+.post-detail {
+  border: 1px solid rgba(232, 230, 227, 1);
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: #f5f5f5;
 }
 </style>

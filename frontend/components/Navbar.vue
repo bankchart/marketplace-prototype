@@ -19,6 +19,7 @@
     <div v-if="isAuthenticated" ref="marketplace-menu" class="navbar-menu">
       <div class="navbar-start">
         <nuxt-link class="navbar-item" to="/profile">My Profile</nuxt-link>
+        <nuxt-link class="navbar-item" to="/tags">Tags</nuxt-link>
       </div>
       <div class="navbar-end">
         <div class="navbar-item">
