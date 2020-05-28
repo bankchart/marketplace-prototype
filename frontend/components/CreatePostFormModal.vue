@@ -27,6 +27,7 @@
                 placeholder=""
                 :tags="tags"
                 :autocomplete-items="filteredItems"
+                autocomplete-min-length="0"
                 @tags-changed="newTags => (tags = newTags)"
                 @before-adding-tag="checkDupTag"
               />
@@ -209,7 +210,7 @@ export default {
     checkDupTag(obj) {
       let add = true;
       for (const tag of this.tags) {
-        if (obj.tag.text.toLowerCase().trim() === tag.text.toLowerCase()) {
+        if (obj.tag.text.trim() === tag.text) {
           this.tag = "";
           add = false;
           break;
