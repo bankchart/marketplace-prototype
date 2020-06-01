@@ -144,43 +144,43 @@ export default {
           "/graphql",
           {
             query: `
-            query {
-              group(id: ${groupId}) {
+            query ($categoryName: String!, $groupId: ID!) {
+              group (id: $groupId) {
                 name
               }
-              categories(where: { name: "${tag}" posts:{group:{id: ${groupId}}} }) {
+              posts (where: { categories: { name: $categoryName }, group: { id: $groupId } }) {
                 id
-                name
-                posts {
+                title
+                detail
+                owner {
                   id
-                  title
-                  detail
+                  first_name
+                  last_name
+                  picture_profile
+                }
+                comments {
+                  id
+                  content
                   owner {
                     id
                     first_name
                     last_name
                     picture_profile
                   }
-                  comments {
-                    id
-                    content
-                    owner {
-                      id
-                      first_name
-                      last_name
-                      picture_profile
-                    }
-                  }
-                  categories {
-                    name
-                  }
-                  group {
-                    name
-                  }
+                }
+                categories {
+                  name
+                }
+                group {
+                  name
                 }
               }
             }
-            `
+            `,
+            variables: {
+              categoryName: tag,
+              groupId
+            }
           },
           {
             headers: {
@@ -189,11 +189,8 @@ export default {
           }
         );
 
-        const categories = result.data.data.categories;
         this.groupName = result.data.data.group.name;
-        if (categories.length > 0 && categories[0]) {
-          this.posts = categories[0].posts;
-        }
+        this.posts = result.data.data.posts;
         this.subReady = true;
       } catch (e) {
         console.error(e);

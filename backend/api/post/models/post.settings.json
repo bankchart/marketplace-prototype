@@ -39,8 +39,20 @@
       "via": "post"
     },
     "categories": {
-      "via": "posts",
-      "collection": "category"
+      "collection": "category",
+      "via": "posts"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "pictures": {
+      "collection": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images"
+      ],
+      "plugin": "upload",
+      "required": false
     }
   }
 }
