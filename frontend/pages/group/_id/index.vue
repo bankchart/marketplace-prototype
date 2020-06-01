@@ -252,6 +252,7 @@ export default {
 
   async mounted() {
     await this.loadPosts();
+    await this.changeURL();
   },
 
   methods: {
@@ -419,6 +420,24 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+    changeURL() {
+      let postName = "";
+      let newUrl = "";
+      const locateSplit = window.location.href.split("#");
+
+      if (locateSplit.length > 1) {
+        for (let i = 0; i < this.posts.length; i++) {
+          if (this.posts[i].id === locateSplit[1]) {
+            postName = this.posts[i].title;
+          }
+        }
+        newUrl = `/group/${this.groupName}/${postName}`;
+      } else {
+        newUrl = `/group/${this.groupName}`;
+      }
+
+      window.history.replaceState(null, null, newUrl);
     },
     ...mapMutations({
       setShowCreatePostModal: "setShowCreatePostModal",

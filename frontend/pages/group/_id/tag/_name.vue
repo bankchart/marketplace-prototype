@@ -132,6 +132,7 @@ export default {
   async mounted() {
     this.parentPath = `/group/${this.$route.params.id}`;
     await this.loadPosts();
+    await this.changeURL();
   },
 
   methods: {
@@ -201,6 +202,11 @@ export default {
     },
     gotoPost(id) {
       this.$router.push(`/group/${this.$route.params.id}#${id}`);
+    },
+    changeURL() {
+      const locateSplit = window.location.href.split("/");
+      const newUrl = `/group/${this.groupName}/tag/${locateSplit[6]}`;
+      window.history.replaceState(null, null, newUrl);
     }
   }
 };
