@@ -13,7 +13,7 @@
       <section class="modal-card-body">
         <div>
           <div class="field">
-            <label class="label">ชื่อโพสต์</label>
+            <label class="label">ชื่อ</label>
             <div class="control">
               <input v-model="post.title" class="input" type="text" />
             </div>
@@ -27,7 +27,7 @@
                 placeholder=""
                 :tags="tags"
                 :autocomplete-items="filteredItems"
-                autocomplete-min-length="0"
+                :autocomplete-min-length="0"
                 @tags-changed="newTags => (tags = newTags)"
                 @before-adding-tag="checkDupTag"
               />
@@ -35,7 +35,19 @@
           </div>
 
           <div class="field">
-            <label class="label">รายละเอียด</label>
+            <label class="label">ราคา</label>
+            <div class="control">
+              <currency-input
+                v-model="post.price"
+                currency="THB"
+                :allow-negative="false"
+                class="input"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">คำอธิบาย</label>
             <div class="control">
               <client-only>
                 <quill-editor v-model="post.detail" :options="editorOption" />
@@ -44,6 +56,57 @@
           </div>
 
           <div class="field">
+            <label class="label">
+              รูปภาพ({{ images.length }}/10)
+              <span
+                v-if="images.length > 0"
+                class="tag is-danger"
+                style="cursor: pointer"
+                @click="clearImage"
+              >
+                ลบรูปทั้งหมด
+              </span>
+            </label>
+            <div class="control">
+              <picture-input
+                v-if="pictureInputTriggerReset && images.length < 10"
+                ref="pictureInput"
+                width="250"
+                height="250"
+                margin="16"
+                accept="image/*"
+                size="5"
+                :crop="false"
+                :removable="false"
+                :hide-change-button="false"
+                :custom-strings="{
+                  upload: '<h1>Bummer!</h1>',
+                  drag: 'เพิ่มรูปภาพ',
+                  remove: 'ลบรูปนี้',
+                  change: 'เพิ่มรูปภาพ'
+                }"
+                @change="onChange"
+              >
+              </picture-input>
+              <div class="columns is-multiline">
+                <div
+                  v-for="(image, index) in images"
+                  :key="`image-${index}`"
+                  class="column is-one-quarter-desktop is-half-tablet"
+                >
+                  <div class="card">
+                    <div class="card-image">
+                      <figure class="image is-3by2">
+                        <img :src="image.base64" alt="" />
+                      </figure>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="field">
             <label class="label">คีย์เวิร์ด</label>
             <div class="contorl">
               <div class="select">
@@ -53,7 +116,7 @@
                 </select>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </section>
       <footer class="modal-card-foot">
@@ -73,26 +136,34 @@
 
 <script>
 import { mapGetters, mapMutations } from "vuex";
+import PictureInput from "vue-picture-input";
 
 export default {
+  components: {
+    PictureInput
+  },
+
   data() {
     return {
+      pictureInputTriggerReset: true,
       error: null,
       post: {
         title: null,
         detail: null,
+        price: 0,
         keywords: "product"
       },
       editorOption: {
-        theme: "snow",
+        theme: "bubble",
         modules: {
-          toolbar: [["image"]]
+          toolbar: []
         },
         placeholder: ""
       },
       tag: "",
       tags: [],
-      autocompleteItems: []
+      autocompleteItems: [],
+      images: []
     };
   },
 
@@ -118,6 +189,37 @@ export default {
       setForceLoadPost: "setForceLoadPost"
     }),
 
+    onChange(imageBase64) {
+      if (imageBase64) {
+        const formData = new FormData();
+        const reader = new FileReader();
+        reader.onload = e => {
+          this.images.push({
+            file: this.$refs.pictureInput.file,
+            base64: e.target.result
+          });
+        };
+
+        reader.readAsDataURL(this.$refs.pictureInput.file);
+      } else {
+        console.warn("FileReader API not supported: use the <form>, Luke!");
+      }
+    },
+
+    clearPreviewImage() {
+      this.pictureInputTriggerReset = false;
+      setTimeout(() => {
+        this.pictureInputTriggerReset = true;
+      }, 100);
+    },
+    clearImage() {
+      this.pictureInputTriggerReset = false;
+      this.images = [];
+      setTimeout(() => {
+        this.pictureInputTriggerReset = true;
+      }, 100);
+    },
+
     async createPost(e) {
       try {
         e.preventDefault();
@@ -142,6 +244,7 @@ export default {
         );
 
         let newTagsResult = {};
+        const uploads = [];
 
         if (difference.length > 0) {
           newTagsResult = await this.$backend.post(
@@ -161,16 +264,36 @@ export default {
           };
         }
 
+        if (this.images.length > 0) {
+          const formData = new FormData();
+          this.images.forEach(img => {
+            formData.append("files", img.file);
+          });
+
+          const result = await this.$backend.post("/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${this.jwtToken}`
+            }
+          });
+
+          result.data.forEach(img => {
+            uploads.push(img.id);
+          });
+        }
+
         const result = await this.$backend.post(
           "/posts",
           {
             title: this.post.title,
+            price: this.post.price,
             detail:
               (this.post.detail || "").trim() === "" ? null : this.post.detail,
             keywords: this.post.keywords,
             group: this.$route.params.id,
             owner: this.userId,
-            categories: [...new Set([...postTags, ...newTagsResult.data.tags])]
+            categories: [...new Set([...postTags, ...newTagsResult.data.tags])],
+            pictures: uploads
           },
           {
             headers: {
@@ -227,6 +350,9 @@ export default {
 <style lang="css" scoped>
 .vue-tags-input {
   max-width: none !important;
+}
+.quill-editor {
+  border: 1px solid #cccccc;
 }
 .input {
   border-radius: 0px;

@@ -151,7 +151,8 @@ export default {
       formData.append("files", imageFile.files[0]);
       const result = await this.$backend.post("/upload", formData, {
         headers: {
-          "Content-Type": "multipart/form-data"
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${this.jwtToken}`
         }
       });
       return result.data[0].id;

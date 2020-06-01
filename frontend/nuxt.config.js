@@ -62,6 +62,7 @@ export default {
   plugins: [
     { src: "~plugins/nuxt-quill-plugin", ssr: false },
     { src: "~/plugins/vue-tags-input", ssr: false },
+    { src: "~/plugins/vue-agile", ssr: false },
     "~plugins/nuxt-axios.js"
   ],
   /*
@@ -79,6 +80,7 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/auth",
     "@nuxtjs/dotenv",
+    "vue-currency-input/nuxt",
     [
       "nuxt-fontawesome",
       {

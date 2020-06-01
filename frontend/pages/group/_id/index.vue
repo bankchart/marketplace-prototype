@@ -1,5 +1,5 @@
 <template>
-  <section class="section">
+  <section id="app" class="section">
     <nav class="breadcrumb" aria-label="breadcrumbs">
       <ul>
         <li>
@@ -98,6 +98,25 @@
                 <span v-html="post.detail"></span>
                 <br />
               </p>
+              <em>฿{{ post.price || 0 }}</em>
+              <div class="columns is-multiline">
+                <div
+                  v-for="(pic, picIndex) in post.pictures"
+                  :key="`pic-${picIndex}`"
+                  class="column is-one-quarter-desktop is-half-tablet"
+                >
+                  <div class="card">
+                    <div class="card-image">
+                      <figure class="image is-3by2">
+                        <img
+                          :src="`${$axios.defaults.baseURL}${pic.url}`"
+                          alt=""
+                        />
+                      </figure>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <span
                 v-for="(tag, tagIndex) in post.categories"
                 :key="`tag-${tagIndex}`"
@@ -284,6 +303,10 @@ export default {
                     id
                     title
                     detail
+                    price
+                    pictures {
+                      url
+                    }
                     comments {
                       id
                       content
