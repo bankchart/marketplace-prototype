@@ -191,7 +191,6 @@ export default {
 
     onChange(imageBase64) {
       if (imageBase64) {
-        const formData = new FormData();
         const reader = new FileReader();
         reader.onload = e => {
           this.images.push({
@@ -212,6 +211,7 @@ export default {
         this.pictureInputTriggerReset = true;
       }, 100);
     },
+
     clearImage() {
       this.pictureInputTriggerReset = false;
       this.images = [];
