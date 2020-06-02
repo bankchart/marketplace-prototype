@@ -22,6 +22,8 @@ export const state = () => ({
       postId: null,
       postName: null,
       postDetail: null,
+      postPrice: 0,
+      postPictures: [],
       groupId: null
     },
     editComment: {
@@ -146,6 +148,8 @@ export const mutations = {
       postId: null,
       postName: null,
       postDetail: null,
+      postPrice: 0,
+      postPictures: [],
       groupId: null
     };
   },
@@ -172,11 +176,16 @@ export const mutations = {
     };
   },
 
-  setPropsEditPost(state, { postId, postName, postDetail, groupId }) {
+  setPropsEditPost(
+    state,
+    { postId, postName, postDetail, postPrice, postPictures = [], groupId }
+  ) {
     state.propsModal.editPost = {
       postId,
       postName,
       postDetail,
+      postPrice,
+      postPictures,
       groupId
     };
   },

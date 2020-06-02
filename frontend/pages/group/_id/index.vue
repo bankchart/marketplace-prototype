@@ -76,6 +76,8 @@
                     post.id,
                     post.title,
                     post.detail,
+                    post.price,
+                    post.pictures,
                     $route.params.id
                   )
                 "
@@ -279,8 +281,22 @@ export default {
       this.setPropsConfirmDeletePost({ postId, postName, groupId });
       this.setShowConfirmDeletePostModal(true);
     },
-    triggerOpenEditPostModal(postId, postName, postDetail, groupId) {
-      this.setPropsEditPost({ postId, postName, postDetail, groupId });
+    triggerOpenEditPostModal(
+      postId,
+      postName,
+      postDetail,
+      postPrice,
+      postPictures,
+      groupId
+    ) {
+      this.setPropsEditPost({
+        postId,
+        postName,
+        postDetail,
+        postPrice,
+        postPictures,
+        groupId
+      });
       this.setShowEditPostModal(true);
     },
     triggerOpenConfirmDeleteCommentModal(commentId, commentContent) {
@@ -305,6 +321,7 @@ export default {
                     detail
                     price
                     pictures {
+                      id
                       url
                     }
                     comments {
